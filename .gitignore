@@ -1,0 +1,32 @@
+# Laravel Project
+laravel/.env
+laravel/.env.backup
+laravel/.env.production
+laravel/vendor/
+laravel/node_modules/
+laravel/public/build/
+laravel/public/hot
+laravel/public/storage
+laravel/storage/*.key
+laravel/storage/logs/*.log
+laravel/storage/pail/
+laravel/bootstrap/cache/*
+!laravel/bootstrap/cache/.gitignore
+
+# IDE
+/.idea
+/.vscode
+/.fleet
+/.nova
+/.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Project specific
+PROJECT_ALIGNMENT_REPORT.md
+
