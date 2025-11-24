@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use App\Models\Team;
 use App\Policies\TeamPolicy;
+use App\Models\Tournament;
+use App\Policies\TournamentPolicy;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -33,5 +35,6 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register policies
         Gate::policy(Team::class, TeamPolicy::class);
+        Gate::policy(Tournament::class, TournamentPolicy::class);
     }
 }

@@ -18,17 +18,18 @@ class ReviewController extends Controller
 
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'review_text' => 'required|string|min:50',
+            'review_text' => 'required|string|min:10',
             'rating' => 'required|integer|min:1|max:5',
         ]);
 
         $validated['game_id'] = $game->id;
         $validated['user_id'] = Auth::id();
-        $validated['is_approved'] = false;
+        $validated['is_approved'] = true;
+        $validated['approved_at'] = now();
 
         GameReview::create($validated);
 
-        return back()->with('success', 'Review submitted! It will be visible after approval.');
+        return back()->with('success', 'Review submitted successfully!');
     }
 
     public function updateGameReview(Request $request, $id)
@@ -78,7 +79,8 @@ class ReviewController extends Controller
 
         $validated['match_id'] = $match->id;
         $validated['user_id'] = Auth::id();
-        $validated['is_approved'] = false;
+        $validated['is_approved'] = true;
+        $validated['approved_at'] = now();
 
         GameReview::create($validated);
 

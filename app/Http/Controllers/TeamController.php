@@ -105,6 +105,22 @@ class TeamController extends Controller
             ->with('success', 'Team updated successfully!');
     }
 
+    public function manageMembers($slug)
+    {
+        $team = Team::where('slug', $slug)
+            ->with(['members', 'captain'])
+            ->firstOrFail();
+            
+        $this->authorize('update', $team);
+
+        // Get users who are not already in the team
+        $availableUsers = User::whereDoesntHave('teams', function($q) use ($team) {
+            $q->where('team_id', $team->id);
+        })->get();
+
+        return view('teams.manage-members', compact('team', 'availableUsers'));
+    }
+
     public function addMember(Request $request, $slug)
     {
         $team = Team::where('slug', $slug)->firstOrFail();

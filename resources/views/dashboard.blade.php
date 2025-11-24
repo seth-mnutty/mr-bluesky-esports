@@ -35,11 +35,7 @@
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-400 uppercase tracking-wide mb-2">Tournaments</p>
                         <p class="text-5xl font-black text-white mb-1">
-                            @php
-                                $teamIds = auth()->user()->teams()->pluck('teams.id')->merge(auth()->user()->captainedTeams()->pluck('id'));
-                                $tournamentCount = \App\Models\TournamentRegistration::whereIn('team_id', $teamIds)->count();
-                            @endphp
-                            {{ $tournamentCount }}
+                            {{ $joinedTournamentsCount }}
                         </p>
                         <p class="text-sm text-gray-500">Joined tournaments</p>
                     </div>
@@ -56,7 +52,7 @@
                 <div class="flex items-center justify-between">
                     <div class="flex-1">
                         <p class="text-sm font-medium text-gray-400 uppercase tracking-wide mb-2">Reviews</p>
-                        <p class="text-5xl font-black text-white mb-1">{{ auth()->user()->gameReviews()->count() }}</p>
+                        <p class="text-5xl font-black text-white mb-1">{{ $reviewsCount }}</p>
                         <p class="text-sm text-gray-500">Your reviews</p>
                     </div>
                     <div class="w-16 h-16 bg-gradient-to-br from-sky-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg border border-sky-500/50">
@@ -66,6 +62,71 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Upcoming Tournaments -->
+        <div class="mb-10">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl sm:text-3xl font-black text-white uppercase tracking-tight">Upcoming Tournaments</h2>
+                <a href="{{ route('tournaments.index') }}" class="text-sky-500 hover:text-sky-400 font-bold flex items-center gap-1">
+                    View All
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+            
+            @if($upcomingTournaments->count() > 0)
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach($upcomingTournaments as $tournament)
+                        <div class="bg-gradient-to-br from-gray-900 to-black border border-sky-900/30 rounded-2xl overflow-hidden hover:border-sky-500/60 transition-all duration-300 group flex flex-col h-full">
+                            <!-- Tournament Image/Header -->
+                            <div class="h-32 bg-gray-800 relative">
+                                @if($tournament->image)
+                                    <img src="{{ asset('storage/' . $tournament->image) }}" alt="{{ $tournament->name }}" class="w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-sky-900 to-blue-900 opacity-60">
+                                        <span class="text-4xl font-black text-white/20">{{ substr($tournament->name, 0, 1) }}</span>
+                                    </div>
+                                @endif
+                                <div class="absolute top-3 right-3">
+                                    <span class="bg-sky-600 text-white text-xs font-bold px-2 py-1 rounded uppercase">
+                                        {{ $tournament->game->title ?? 'Game' }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="p-5 flex-1 flex flex-col">
+                                <h3 class="text-lg font-bold text-white mb-2 line-clamp-1" title="{{ $tournament->name }}">{{ $tournament->name }}</h3>
+                                <div class="space-y-2 mb-4 flex-1">
+                                    <div class="flex items-center text-gray-400 text-sm">
+                                        <svg class="w-4 h-4 mr-2 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                        </svg>
+                                        {{ \Carbon\Carbon::parse($tournament->start_date)->format('M d, Y') }}
+                                    </div>
+                                    @if($tournament->prize_pool)
+                                        <div class="flex items-center text-gray-400 text-sm">
+                                            <svg class="w-4 h-4 mr-2 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            Kshs {{ number_format($tournament->prize_pool) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                <a href="{{ route('tournaments.show', $tournament->slug) }}" class="block w-full text-center bg-gradient-to-r from-sky-600 to-blue-700 text-white py-2 rounded-lg font-bold hover:from-sky-500 hover:to-blue-600 transition shadow-lg shadow-sky-900/20 border border-sky-500/50">
+                                    Join Now
+                                </a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="bg-gradient-to-br from-gray-900 to-black border border-sky-900/30 rounded-2xl p-8 text-center">
+                    <p class="text-gray-400">No upcoming tournaments found.</p>
+                </div>
+            @endif
         </div>
 
         <!-- Quick Actions -->

@@ -9,6 +9,7 @@ use App\Models\TournamentRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Services\FixtureGeneratorService;
 
 class TournamentController extends Controller
 {
@@ -183,10 +184,39 @@ class TournamentController extends Controller
         TournamentRegistration::create([
             'tournament_id' => $tournament->id,
             'team_id' => $request->team_id,
-            'status' => 'pending',
+            'status' => 'approved',
             'registered_at' => now(),
+            'approved_at' => now(),
         ]);
 
-        return back()->with('success', 'Team registered successfully! Waiting for approval.');
+        return back()->with('success', 'Team registered successfully!');
+    }
+
+    public function generateFixtures(Request $request, $slug, FixtureGeneratorService $generator)
+    {
+        $tournament = Tournament::where('slug', $slug)->firstOrFail();
+        $this->authorize('update', $tournament);
+
+        try {
+            $generator->generateFixtures($tournament);
+            return back()->with('success', 'Fixtures generated successfully!');
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function leaderboard($slug)
+    {
+        $tournament = Tournament::where('slug', $slug)->firstOrFail();
+        
+        $leaderboard = $tournament->registrations()
+            ->approved()
+            ->with('team')
+            ->orderByDesc('points')
+            ->orderByDesc('wins')
+            ->orderByDesc('matches_played')
+            ->get();
+
+        return view('tournaments.leaderboard', compact('tournament', 'leaderboard'));
     }
 }

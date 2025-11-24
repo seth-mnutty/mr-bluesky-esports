@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $game->title . ' - BLUESKY')
+@section('title', $game->title . ' -* BLUESKY')
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black">
@@ -98,7 +98,20 @@
             @auth
                 <form action="{{ route('games.reviews.store', $game->slug) }}" method="POST" class="mb-8">
                     @csrf
-                    <textarea name="content" rows="4" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 placeholder-gray-500" placeholder="Write a review..."></textarea>
+                    <div class="mb-4">
+                        <input type="text" name="title" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 placeholder-gray-500" placeholder="Review Title" required>
+                    </div>
+                    <div class="mb-4">
+                        <select name="rating" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500" required>
+                            <option value="">Select Rating</option>
+                            <option value="5">5 Stars - Excellent</option>
+                            <option value="4">4 Stars - Good</option>
+                            <option value="3">3 Stars - Average</option>
+                            <option value="2">2 Stars - Poor</option>
+                            <option value="1">1 Star - Terrible</option>
+                        </select>
+                    </div>
+                    <textarea name="review_text" rows="4" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 placeholder-gray-500" placeholder="Write your review (min 10 characters)..." required></textarea>
                     <div class="mt-3 flex justify-end">
                         <button type="submit" class="bg-gradient-to-r from-sky-600 to-blue-700 text-white px-6 py-2.5 rounded-lg hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">Submit Review</button>
                     </div>
@@ -119,7 +132,7 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="text-gray-300 mt-2">{{ $review->content }}</p>
+                        <p class="text-gray-300 mt-2">{{ $review->review_text }}</p>
                     </div>
                 @empty
                     <div class="text-center py-12">

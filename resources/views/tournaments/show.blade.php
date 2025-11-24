@@ -146,26 +146,61 @@
             <!-- Sidebar -->
             <div class="lg:col-span-1">
                 <!-- Registration -->
-                @if($userCanRegister)
-                    <div class="bg-gradient-to-br from-gray-900 to-black border border-sky-900/30 rounded-2xl shadow-xl p-6 mb-6">
-                        <h3 class="text-xl font-black text-white mb-4 uppercase tracking-tight">Register Your Team</h3>
-                        <form action="{{ route('tournaments.register', $tournament->slug) }}" method="POST">
-                            @csrf
-                            <div class="mb-4">
-                                <label class="block text-sm font-bold mb-2 text-gray-300 uppercase text-xs tracking-wider">Select Team</label>
-                                <select name="team_id" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500" required>
-                                    <option value="">Choose a team</option>
-                                    @foreach(auth()->user()->captainedTeams as $team)
-                                        <option value="{{ $team->id }}">{{ $team->name }}</option>
-                                    @endforeach
-                                </select>
+                <!-- Registration -->
+                <div class="bg-gradient-to-br from-gray-900 to-black border border-sky-900/30 rounded-2xl shadow-xl p-6 mb-6">
+                    <h3 class="text-xl font-black text-white mb-4 uppercase tracking-tight">Register Your Team</h3>
+                    
+                    @auth
+                        @if($tournament->isRegistrationOpen())
+                            @if($registeredTeams->count() >= $tournament->max_teams)
+                                <div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4 text-center">
+                                    <p class="text-red-400 font-bold">Tournament is Full</p>
+                                </div>
+                            @elseif(auth()->user()->captainedTeams->count() > 0)
+                                <form action="{{ route('tournaments.register', $tournament->slug) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-bold mb-2 text-gray-300 uppercase text-xs tracking-wider">Select Team</label>
+                                        <select name="team_id" class="w-full bg-gray-900 border border-sky-900/30 rounded-lg px-4 py-2.5 text-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500" required>
+                                            <option value="">Choose a team</option>
+                                            @foreach(auth()->user()->captainedTeams as $team)
+                                                <option value="{{ $team->id }}">{{ $team->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-lg hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">
+                                        Register Team
+                                    </button>
+                                </form>
+                            @else
+                                <div class="text-center">
+                                    <p class="text-gray-400 mb-4">You need to be a team captain to register.</p>
+                                    <a href="{{ route('teams.create') }}" class="block w-full bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-lg hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">
+                                        Create a Team
+                                    </a>
+                                </div>
+                            @endif
+                        @else
+                            <div class="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4 text-center">
+                                <p class="text-yellow-400 font-bold">Registration is currently closed</p>
+                                <p class="text-sm text-gray-400 mt-1">
+                                    @if($tournament->registration_start > now())
+                                        Opens: {{ $tournament->registration_start->format('M d, Y') }}
+                                    @else
+                                        Closed: {{ $tournament->registration_end->format('M d, Y') }}
+                                    @endif
+                                </p>
                             </div>
-                            <button type="submit" class="w-full bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-lg hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">
-                                Register Team
-                            </button>
-                        </form>
-                    </div>
-                @endif
+                        @endif
+                    @else
+                        <div class="text-center">
+                            <p class="text-gray-400 mb-4">Please login to register for this tournament.</p>
+                            <a href="{{ route('login') }}" class="block w-full bg-gradient-to-r from-sky-600 to-blue-700 text-white py-3 rounded-lg hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">
+                                Login to Register
+                            </a>
+                        </div>
+                    @endauth
+                </div>
 
                 <!-- Tournament Stats -->
                 <div class="bg-gradient-to-br from-gray-900 to-black border border-sky-900/30 rounded-2xl shadow-xl p-6 sticky top-6">
@@ -179,10 +214,26 @@
                             <span class="text-gray-400 uppercase text-xs tracking-wider">Available Slots</span>
                             <span class="font-black text-white text-xl">{{ max(0, $tournament->max_teams - $registeredTeams->count()) }}</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center pb-4 border-b border-sky-900/30">
                             <span class="text-gray-400 uppercase text-xs tracking-wider">Total Matches</span>
                             <span class="font-black text-white text-xl">{{ $tournament->matches()->count() }}</span>
                         </div>
+                        
+                        <a href="{{ route('tournaments.leaderboard', $tournament->slug) }}" class="block w-full bg-gray-800 hover:bg-gray-700 text-white text-center py-3 rounded-lg transition font-bold border border-gray-700">
+                            View Leaderboard
+                        </a>
+
+                        @can('update', $tournament)
+                            <div class="pt-4 border-t border-sky-900/30">
+                                <h4 class="text-white font-bold mb-2">Admin Controls</h4>
+                                <form action="{{ route('tournaments.generate-fixtures', $tournament->slug) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="w-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-3 rounded-lg hover:from-purple-500 hover:to-indigo-600 transition font-bold border border-purple-500/50" onclick="return confirm('Are you sure you want to generate fixtures? This will create matches for all registered teams.')">
+                                        Generate Fixtures
+                                    </button>
+                                </form>
+                            </div>
+                        @endcan
                     </div>
                 </div>
             </div>

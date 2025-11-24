@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Matches;
 use App\Models\Tournament;
 use App\Models\PlayerPerformance;
+use App\Models\TournamentRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,6 +108,9 @@ class MatchController extends Controller
             // Update team win rates
             $match->team1->updateWinRate();
             $match->team2->updateWinRate();
+
+            // Update Tournament Leaderboard
+            $this->updateLeaderboard($match, $validated['team1_score'], $validated['team2_score']);
         }
 
         $match->update($updateData);
@@ -137,5 +141,36 @@ class MatchController extends Controller
         $performance->calculateKDA();
 
         return back()->with('success', 'Player performance added successfully!');
+    }
+
+    private function updateLeaderboard(Matches $match, $score1, $score2)
+    {
+        $reg1 = TournamentRegistration::where('tournament_id', $match->tournament_id)
+            ->where('team_id', $match->team1_id)
+            ->first();
+
+        $reg2 = TournamentRegistration::where('tournament_id', $match->tournament_id)
+            ->where('team_id', $match->team2_id)
+            ->first();
+
+        if ($reg1 && $reg2) {
+            $reg1->increment('matches_played');
+            $reg2->increment('matches_played');
+
+            if ($score1 > $score2) {
+                $reg1->increment('wins');
+                $reg1->increment('points', 3);
+                $reg2->increment('losses');
+            } elseif ($score2 > $score1) {
+                $reg2->increment('wins');
+                $reg2->increment('points', 3);
+                $reg1->increment('losses');
+            } else {
+                $reg1->increment('draws');
+                $reg1->increment('points', 1);
+                $reg2->increment('draws');
+                $reg2->increment('points', 1);
+            }
+        }
     }
 }

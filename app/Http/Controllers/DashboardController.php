@@ -1,46 +1,36 @@
 <?php
-// app/Http/Controllers/Admin/DashboardController.php
-namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use App\Models\Game;
+namespace App\Http\Controllers;
+
 use App\Models\Tournament;
-use App\Models\Team;
-use App\Models\Matches;
+use App\Models\TournamentRegistration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware(['auth', 'admin']);
-    }
-
     public function index()
     {
-        $stats = [
-            'total_users' => User::count(),
-            'total_games' => Game::count(),
-            'total_tournaments' => Tournament::count(),
-            'total_teams' => Team::count(),
-            'active_tournaments' => Tournament::whereIn('status', ['registration_open', 'ongoing'])->count(),
-            'completed_matches' => Matches::where('status', 'completed')->count(),
-            'pending_registrations' => \App\Models\TournamentRegistration::where('status', 'pending')->count(),
-        ];
+        $user = Auth::user();
 
-        $recentTournaments = Tournament::with('game', 'organizer')
-                                      ->latest()
-                                      ->take(5)
-                                      ->get();
+        // Calculate Joined Tournaments Count
+        // Get all teams the user is part of (captain or member)
+        $teamIds = $user->teams()->pluck('teams.id')
+            ->merge($user->captainedTeams()->pluck('id'))
+            ->unique();
+            
+        $joinedTournamentsCount = TournamentRegistration::whereIn('team_id', $teamIds)
+            ->count();
 
-        $recentUsers = User::latest()->take(5)->get();
+        // Calculate Reviews Count
+        $reviewsCount = $user->gameReviews()->count() + $user->matchReviews()->count();
 
-        $upcomingMatches = Matches::upcoming()
-                                ->with('tournament.game', 'team1', 'team2')
-                                ->take(5)
-                                ->get();
+        // Fetch Upcoming Tournaments
+        $upcomingTournaments = Tournament::whereIn('status', ['scheduled', 'open'])
+            ->orderBy('tournament_start', 'asc')
+            ->take(4)
+            ->get();
 
-        return view('admin.dashboard', compact('stats', 'recentTournaments', 'recentUsers', 'upcomingMatches'));
+        return view('dashboard', compact('joinedTournamentsCount', 'reviewsCount', 'upcomingTournaments'));
     }
 }

@@ -32,7 +32,7 @@ class UpdateGameImages extends Command
             'dota-2' => 'https://via.placeholder.com/600x800/45B7D1/FFFFFF?text=Dota+2',
             'valorant' => 'https://via.placeholder.com/600x800/FFA07A/FFFFFF?text=Valorant',
             'fc-26' => 'https://via.placeholder.com/600x800/98D8C8/FFFFFF?text=FC+26',
-            'fortnite' => 'https://via.placeholder.com/600x800/F7DC6F/FFFFFF?text=Fortnite',
+            'fortnite' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=800&fit=crop',
         ];
 
         $updated = 0;

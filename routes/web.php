@@ -58,10 +58,7 @@ Route::middleware(['auth'])->group(function () {
     
     //  FIX: ADDED GENERIC USER DASHBOARD ROUTE 
     // This defines the route named 'dashboard' for all authenticated users
-    Route::get('/dashboard', function () {
-        // You will need to create this view file: resources/views/dashboard.blade.php
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
     //  END FIX
     
     // Profile
@@ -107,6 +104,8 @@ Route::middleware(['auth'])->group(function () {
     
     // Tournament Registration
     Route::post('/tournaments/{slug}/register', [TournamentController::class, 'register'])->name('tournaments.register');
+    Route::post('/tournaments/{slug}/fixtures', [TournamentController::class, 'generateFixtures'])->name('tournaments.generate-fixtures');
+    Route::get('/tournaments/{slug}/leaderboard', [TournamentController::class, 'leaderboard'])->name('tournaments.leaderboard');
 
     // Teams - CRUD
     Route::get('/teams/create/new', [TeamController::class, 'create'])->name
@@ -120,10 +119,9 @@ Route::middleware(['auth'])->group(function () {
     ('teams.destroy');
     
     // Team Members
-    Route::post('/teams/{slug}/members', [TeamController::class, 'addMember'])->name
-    ('teams.members.add');
-    Route::delete('/teams/{slug}/members/{userId}', [TeamController::class, 'removeMember'])->name
-    ('teams.members.remove');
+    Route::get('/teams/{slug}/members', [TeamController::class, 'manageMembers'])->name('teams.members');
+    Route::post('/teams/{slug}/members', [TeamController::class, 'addMember'])->name('teams.members.add');
+    Route::delete('/teams/{slug}/members/{userId}', [TeamController::class, 'removeMember'])->name('teams.members.remove');
 
     // Matches
     Route::get('/tournaments/{slug}/matches/create', [MatchController::class, 'create'])->name('matches.create');

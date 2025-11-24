@@ -241,7 +241,7 @@
                                 <a href="{{ route('teams.edit', $team->slug) }}" class="block w-full text-center bg-gradient-to-r from-sky-600 to-blue-700 text-white py-2.5 rounded-xl hover:from-sky-500 hover:to-blue-600 transition font-bold border border-sky-500/50">
                                     Edit Team
                                 </a>
-                                <a href="{{ route('teams.show', $team->slug) }}" class="block w-full text-center bg-gray-800 border border-sky-900/30 text-gray-300 py-2.5 rounded-xl hover:bg-gray-700 transition font-bold">
+                                <a href="{{ route('teams.members', $team->slug) }}" class="block w-full text-center bg-gray-800 border border-sky-900/30 text-gray-300 py-2.5 rounded-xl hover:bg-gray-700 transition font-bold">
                                     Manage Members
                                 </a>
                             </div>

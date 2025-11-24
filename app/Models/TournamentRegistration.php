@@ -16,6 +16,11 @@ class TournamentRegistration extends Model
         'notes',
         'registered_at',
         'approved_at',
+        'points',
+        'wins',
+        'losses',
+        'draws',
+        'matches_played',
     ];
 
     protected $casts = [
